@@ -1,0 +1,16 @@
+* {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    box-sizing: border-box;
+    padding:0;
+}
+
+body {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-text-dark);
+}
+
+:root{
+    --color-text-dark: red;
+}
