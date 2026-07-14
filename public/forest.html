@@ -29,26 +29,25 @@
     </style>
 
     <div id="forestBgImg" class="forestBgImg bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
-        <img src="./assets/topSignPost.png" class="pl-8 w-100 h-64">
-        <div id="tierBoard" class="absolute top-4 left-4 pt-[9%] pl-[10%] text-white p-3 rounded z-30">
+        
+        <div id="tierBoard" class="absolute top-4 left-4 bg-black/60 backdrop-blur-sm border border-emerald-700/40 text-white p-4 rounded-xl shadow-lg w-72">
         </div>
     </div>
     <script src="hackatime.js"></script> 
 
     <script>
-        
         document.getElementById("forestBgImg").classList.add("page-transition");
         //Current implementations: Different plants, tier system, unlocking system, and growth cycling with tracked time, live it 'grows'. 
         let tier = 0;
         const plant_config = {
             tree: { images: ["bgImg/treeStage1.png", "bgImg/treeStage2.png", "bgImg/treeStage3.png", "bgImg/treeStage4.png"], sizes: ["w-8 h-8", "w-10 h-10", "w-14 h-14", "w-20 h-20"]},
-            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ], sizes: ["w-14 h-14", "w-64 h-64"]},
-            pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"], sizes: ["w-8 h-8", "w-10 h-10", "w-64 h-64"]},
-            cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"], sizes: ["w-10 h-10", "w-14 h-14", "w-64 h-64"]},
+            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ], sizes: ["w-10 h-110", "w-16 h-16"]},
+            pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"], sizes: ["w-8 h-8", "w-12 h-12", "w-20 h-20"]},
+            cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"], sizes: ["w-10 h-10", "w-14 h-14", "w-20 h-20"]},
         };
         
-        const secondsPerStage = 90;
-        const maxSecondsPerStage = 100;
+        const secondsPerStage = 300;
+        const maxSecondsPerStage = 400;
 
         function rollStageThresholds(type) {
             const numTransitions = plant_config[type].images.length -1;
@@ -179,16 +178,16 @@
             let countsHTML = "";
 
             if(unlockedTypes.includes("tree")){
-                countsHTML += `<div class="text-emerald-100">Trees: ${counts.tree}</div> <button onclick = "goHome()">Go back</button>`;
+                countsHTML += `<div class="text-emerald-100 whitespace-nowrap">Trees: ${counts.tree}</div>`;
             }
             if(unlockedTypes.includes("shrub")){
-                countsHTML += `<div class="text-yellow-400">Shrubs: ${counts.shrub}</div>`;
+                countsHTML += `<div class="text-yellow-400 whitespace-nowrap">Shrubs: ${counts.shrub}</div>`;
             }
             if(unlockedTypes.includes("pine")){
-                countsHTML += `<div class="text-green-900">Pine Trees: ${counts.pine}</div>`;
+                countsHTML += `<div class="text-green-300 whitespace-nowrap">Pine Trees: ${counts.pine}</div>`;
             }
             if(unlockedTypes.includes("cherry")){
-                countsHTML += `<div class=" text-rose-400">Cherry Trees: ${counts.cherry}`;
+                countsHTML += `<div class="text-rose-300 whitespace-nowrap">Cherry Trees: ${counts.cherry}</div>`;
             }
 
             let progressHTML;
@@ -197,11 +196,11 @@
                 const pct = Math.min(100,(nextTier.progress/nextTier.needed)*100);
                 progressHTML = `
                 <div class="mt-2 text-sm">${nextTier.progress}/${nextTier.needed} ${nextTier.from} to unlock ${nextTier.label}</div>
-                <div class=" w-full bg-emerald/30 rounded-full h-3 mt-1"><div class="bg-orange-400 h-3 rounded-full" style="width:${pct}%"></div></div>`;
+                <div class=" w-full bg-black/40 rounded-full h-3 mt-1"><div class="bg-orange-400 h-3 rounded-full" style="width:${pct}%"></div></div>`;
             }else{
                 progressHTML=`<div class="mt-2 text-sm text-green-300"> ALL TIERS UNLOCKED :)</div>`;
             }
-            board.innerHTML = `<div class="text-xl">${countsHTML}</div>${progressHTML}`;
+            board.innerHTML = `<div class="text-xl font-mono mb-1 space-y-2">${countsHTML}</div>${progressHTML}<button onclick="goHome()" class="mt-3 font-mono text-white bg-emerald-700 hover:bg-emerald-600 px-4 py-1.5 rounded-full text-sm transition-all w-full">Go back</button>`;
         }
 
         
@@ -209,8 +208,8 @@
         function genTreeHole(){
             const gnd = document.getElementById("forestBgImg");
 
-            const x = 10 + Math.random() * 80;
-            const y = 60 + Math.random() * 30;
+            const x = 10 + Math.random() * 78;
+            const y = 60 + Math.random() * 28;
 
             const hole = document.createElement("img");
             hole.src = "/assets/bgImg/plantHole.png";

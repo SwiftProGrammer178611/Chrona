@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment variables / secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Wakatime/Hackatime local project marker
+.wakatime-project
+
+# Build/output artifacts (if you add any later)
+dist/
+build/
