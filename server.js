@@ -118,6 +118,10 @@ app.get("/api/stats", async (req,res) => {
     }
 });
 
-app.listen(PORT,()=>{
-    console.log("Server is running bud!");
-})
+if(require.main === module){
+    app.listen(PORT, ()=>{
+        console.log("Server running bud!");
+    })
+}
+
+module.export = app;
