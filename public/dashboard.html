@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href = "styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Dashbaord</title>
+</head>
+<body>
+    
+    <!--Big breakthrough here. Couldn't figure out how to center the text on teh sign post for a while! The main issue was felx, oncce removed it wokred, but i needed flex. 
+    by default, tailwind flex prop appplies a stretch properpty to the items, and it stretched the sign to the height of the screen(the wrapper, not the img itself). 
+    to stop this, I can use items-start to stop teh stretching and bring back to the actual size! Whew!
+    -->
+        <div class="mainDiv flex items-start  overflow-hidden w-screen h-screen relative">
+            
+            <div class="relative top-[45%] left-[46%] w-64 sm:w-72 md:w-80">
+                <img class="w-full h-auto" src="./assets/signpost.png"/>
+                <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
+                    <p class="text-lg text-white font-thin">Today's growth</p>
+                    <p class="text-sm text-white">2h and 14mins till your next <span class="text-green-300">Sapling</span> </p>
+                </div>
+            </div>
+            
+
+            <div class="relative top-[50%] left-[50%]">
+                <img class="w-[80%] h-auto" src="./assets/directionalSign.png"/>
+                <div class="pt-10">
+            </div>
+            </div>
+
+            <div class="relative top-[35%] left-[-35%]">
+                <img class="w-80 h-150" src="./assets/signpost.png"/>
+                <p class="absolute top-[40px] left-[70px] z-10 text-lg text-white font-thing">Connect Hackatime</p>
+                <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
+                    <div class="stat-card">
+                        <p class="text-white font-thin" id="total-hours-display">Loading</p>
+                    </div>
+                    <button onclick="connectHackatime()" class="bg-gradient-to-r from-green-600 to-brown-800 text-white px-5 py-2 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transtion-all">
+                        Connect Hackatime
+                    </button>
+                </div>
+            </div>
+    </div>
+    
+    <script>
+        const client_id = "UvqLX8h40jmFW2BZKYimI73Vzn5mFOYVoPwAj24nkHI";
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code"); 
+        let goal = 10;
+
+        async function checkGoal() {
+            if(stats.total_hours > 10){
+                console.log("You reached your goal!")
+            }
+        }
+
+        const redirect_uri = encodeURIComponent(
+            "http://localhost:3000/callback"
+        );
+
+        function connectHackatime(){
+            const authUrl=`https://hackatime.hackclub.com/oauth/authorize` + `?client_id=${client_id}` + `&redirect_uri=${redirect_uri}` + `&response_type=code` + `&scope=profile+read`;
+            window.location.href = authUrl;
+        }
+
+        async function loadUserStats(){
+            try {
+                const res = await fetch("/api/stats", {cache:"no-store"});
+
+                if (!res.ok){
+                    throw new Error("couldnt load")
+                }
+                const stats = await res.json();
+
+                document.getElementById("total-hours-display").innerHTML = stats.total_hours
+            }catch(error){
+                console.error(error);
+                document.getElementById("total-hours-display").innerHTML = "failed"
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", loadUserStats);
+    </script>
+</body>
+</html>
