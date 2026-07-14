@@ -6,9 +6,10 @@
     <link rel="stylesheet" href="styles.css"/>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Forest</title>
+    
 </head>
 <body>
-    <div class="mainDiv h-screen w-screen relative">
+    <div id="forestBgImg" class="bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
         <img src="./assets/topSignPost.png"/>
         <div class="treeSap" id="treeSap">
             
@@ -18,7 +19,39 @@
     <script src="hackatime.js"></script>
     <script>
         let treeCounter = 0;
+        
 
+
+        async function genTreeHole(){
+
+        }
+
+        async function shrubs() {
+
+        }
+
+        async function backgroundImgChanges() {
+            try{
+                const stats = await getHackatimeStats();
+                const horsDec = stats.total_seconds / 3600;
+                const forestBgImg = document.getElementById("forestBgImg");
+
+                if(horsDec>6){
+                    forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl4.png')";
+                }
+                else if(horsDec>4){
+                    forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl3.png')";
+                }
+                else if(horsDec>2){
+                    forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl2.png')";
+                }
+                else {
+                    forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl1.png')";
+                }
+            }catch(err){
+                    console.error(err);
+                }
+        }
         async function putTreeSapling(){
             try{
                 const stats = await getHackatimeStats();
@@ -35,8 +68,8 @@
                     console.error(err);
                 }
         }
-
         putTreeSapling();
+        backgroundImgChanges();
     </script>
 </body>
 </html>
