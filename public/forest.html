@@ -9,24 +9,44 @@
     
 </head>
 <body>
-    <div id="forestBgImg" class="bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
-        <img src="./assets/topSignPost.png"/>
-        <div id="tierBoard" class="absolute top-4 left-4 pt-[18%] pl-[10%] text-white p-3 rounded z-30">
-            
+    <style>
+        #forestBgImg.page-transition{ animation: arriveAtForest 1s ease-out;}
+        @keyframes arriveAtForest {
+            from {transform:scale(1.5); filter: brightness(0.3);}
+            to { transform: scale(1); filter: brightness(1);}
+        }
+        .plantSprite {
+            transition: opacity 0.6s ease, width 0.6s ease, height 0.6s ease;
+        }
+
+        #forestBgImg.leaving-forest{
+            animation: walkAwayFromForest 1s ease-in forwards;
+        }
+        @keyframes walkAwayFromForest {
+            from {transform: scale(1); filter: brightness(1); }
+            to {transform: scale(1.8); filter: brightness(0.2);}
+        }
+    </style>
+
+    <div id="forestBgImg" class="forestBgImg bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
+        <img src="./assets/topSignPost.png" class="pl-8 w-100 h-64">
+        <div id="tierBoard" class="absolute top-4 left-4 pt-[9%] pl-[10%] text-white p-3 rounded z-30">
         </div>
-        
     </div>
-    <script src="hackatime.js"></script>
+    <script src="hackatime.js"></script> 
+
     <script>
+        
+        document.getElementById("forestBgImg").classList.add("page-transition");
         //Current implementations: Different plants, tier system, unlocking system, and growth cycling with tracked time, live it 'grows'. 
         let tier = 0;
         const plant_config = {
-            tree: { images: ["bgImg/treeStage1.png", "bgImg/treeStage2.png", "bgImg/treeStage3.png", "bgImg/treeStage4.png"]},
-            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ]},
-            pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"]},
-            cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"]},
+            tree: { images: ["bgImg/treeStage1.png", "bgImg/treeStage2.png", "bgImg/treeStage3.png", "bgImg/treeStage4.png"], sizes: ["w-8 h-8", "w-10 h-10", "w-14 h-14", "w-20 h-20"]},
+            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ], sizes: ["w-14 h-14", "w-64 h-64"]},
+            pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"], sizes: ["w-8 h-8", "w-10 h-10", "w-64 h-64"]},
+            cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"], sizes: ["w-10 h-10", "w-14 h-14", "w-64 h-64"]},
         };
-
+        
         const secondsPerStage = 90;
         const maxSecondsPerStage = 100;
 
@@ -50,17 +70,43 @@
 
         function renderAllPlants(currentTotalSeconds) {
             const ground = document.getElementById("forestBgImg");
-            document.querySelectorAll(".plantSprite").forEach(el => el.remove());
             const plants = JSON.parse(localStorage.getItem("treeSIF") || "[]");
-            plants.forEach(p => {
+            
+            plants.forEach((p,i) => {
                 const stage = getCurrentStage(p,currentTotalSeconds);
-                const img = document.createElement("img");
-                img.src = `assets/${plant_config[p.type].images[stage]}`;
-                img.className = "plantSprite absolute w-16 h-16 z-10";
-                img.style.left = `${p.x}%`;
-                img.style.top = `${p.y-4}%`;
-                ground.appendChild(img);
-            })
+                const size = plant_config[p.type].sizes[stage];
+                const src = `assets/${plant_config[p.type].images[stage]}`;
+
+                let img = document.querySelector(`.plantSprite[data-index="${i}"]`);
+
+                if(!img){
+                    img = document.createElement("img");
+                    img.className = "plantSprite absolute z-10";
+                    img.dataset.index = i; 
+                    img.dataset.stage=stage
+                    img.style.left = `${p.x}%`;
+                    img.style.top = `${p.y-4}%`;
+                    img.style.opacity = "0";
+                    img.src = src;
+                    ground.appendChild(img);
+
+                    requestAnimationFrame(() => {
+                        img.classList.add(...size.split(" "));
+                        img.style.opacity = "1";
+                    });
+                }else if (Number(img.dataset.stage) !== stage){
+                    img.style.opacity = "0";
+                    setTimeout(() => {
+                        
+                        img.src = src;
+                        img.className = `plantSprite absolute ${size} z-10`;
+                        img.dataset.stage = stage;
+                        img.style.left = `${p.x}%`;
+                        img.style.top = `${p.y-4}%`;
+                        img.style.opacity = "1";
+                    }, 600)
+                }
+            });
         }
 
         const tiers_forest = [
@@ -85,11 +131,11 @@
                 unlockAt: 5 //5 pines
             }
         ]
-        
+
         function getTierProgress() {
             const plants = JSON.parse(localStorage.getItem("treeSIF")||"[]");
             const counts = {tree:0,shrub:0,pine:0, cherry:0};
-            plants.forEach(p => {if (counts[p.type] !== undefined) counts[p.type]++; });
+            plants.forEach((p,i) => {if (counts[p.type] !== undefined) counts[p.type]++; });
 
             let unlockedTiers=[];
             let nextTier = null;
@@ -118,6 +164,14 @@
             return unlockedTiers[idx].type;
         }
 
+        function goHome() {
+            document.querySelector(".forestBgImg").classList.add("leaving-forest");
+            setTimeout(()=>{
+                window.location.href = "dashboard.html";
+            },1200)
+            
+        }
+
         function renderTierBoard() {
             const {counts,unlockedTiers,nextTier}=getTierProgress();
             const board = document.getElementById("tierBoard");
@@ -125,7 +179,7 @@
             let countsHTML = "";
 
             if(unlockedTypes.includes("tree")){
-                countsHTML += `<div class="text-emerald-100">Trees: ${counts.tree}</div>`;
+                countsHTML += `<div class="text-emerald-100">Trees: ${counts.tree}</div> <button onclick = "goHome()">Go back</button>`;
             }
             if(unlockedTypes.includes("shrub")){
                 countsHTML += `<div class="text-yellow-400">Shrubs: ${counts.shrub}</div>`;
@@ -149,6 +203,8 @@
             }
             board.innerHTML = `<div class="text-xl">${countsHTML}</div>${progressHTML}`;
         }
+
+        
 
         function genTreeHole(){
             const gnd = document.getElementById("forestBgImg");

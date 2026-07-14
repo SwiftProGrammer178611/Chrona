@@ -12,21 +12,72 @@
         .page-transition{
             animation: walkForward 1.2s ease-in forwards;
         }
+
+        @keyframes walkForward {
+            0% {transform: scale(1); filter: brightness(1);}
+            100% {transform:scale(1.8); filter:brightness(0.2);}
+        }
+
+        .mainDiv.arriving-dashboard{
+            animation: arriveAtDashboard 1s ease-out;
+        }
+        @keyframes arriveAtDashboard {
+            from {transform: scale(1.8); filter:brightness(0.2);}
+            to {transform: scale(1); filter:brightness(1);}
+        }
+
+        .firefly {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #fffb8f 0%, rgba(255,251,143,0) 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255,251,143,0.8);
+            pointer-events: none;
+            animation: flicker 2s ease-in-out infinite, drift 8s ease-in-out infinite;
+
+        }
+
+        @keyframes flicker {
+            0%, 100% {opacity:0.2;}
+            50% {opacity:1;}
+        }
+
+        @keyframes drift{
+            0% {transform:translate(0,0);}
+            25% {transform:translate(var(--dx1), var(--dy1));}
+            50% {transform:translate(var(--dx2), var(--dy2));}
+            75% {transform:translate(var(--dx3), var(--dy3));}
+            100% {transform:translate(0,0);}
+        }
     </style>
-    
     <!--Big breakthrough here. Couldn't figure out how to center the text on teh sign post for a while! After some reserach, The main issue was felx, oncce removed it wokred, but i needed flex. 
     by default, tailwind flex prop appplies a stretch properpty to the items, and it stretched the sign to the height of the screen(the wrapper, not the img itself). 
     to stop this, I can use items-start to stop teh stretching and bring back to the actual size! Whew!
     -->
         <div class="mainDiv flex items-start  overflow-hidden w-screen h-screen relative">
             <div class="absolute top-[5%] left-[3%] w-64 sm:w-72 md:w-80">
-                <img class="w-14 h-14 rounded-full border-2 border-emerald-300" src="./assets/grid.png"/>
+                <img class="w-14 h-14 rounded-full border-2 border-emerald-300" src="./assets/icon.png"/>
+            </div> 
+
+            <div class="absolute top-[6%] left-[88%]">
+                <div class="absolute  flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
+                    <button onclick="openSettingsModal()" class="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white px-5 py-2 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transtion-all font-mono">
+                        Settings
+                    </button>
+                </div>
             </div>
 
-            <div class="absolute top-[10%] left-[90%]">
-                <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
-                    <button onclick="connectHackatime()" class="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white px-5 py-2 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transtion-all">
-                        Settings
+            <div class="absolute top-[35%] left-[75%]">
+                <img class="w-[70%] h-[70%] z-10" src="./assets/signpost.png"/>
+                <img class="w-[20%] h-[20%] absolute top-[66%] left-[12%] z-0" src="./assets/foliageNight.png" />
+                <p class="absolute top-[24.5%] left-[21%] z-10 text-lg text-white font-mono">Connect Hackatime</p>
+                <div class="absolute top-[36%] bottom-[40%] left-[-8%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
+                    <div class="stat-card">
+                        <p class="text-white font-thin" id="total-hours-display">Loading</p>
+                    </div>
+                    <button onclick="connectHackatime()" class="font-mono text-white px-5 py-2 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transtion-all">
+                        Press HERE
                     </button>
                 </div>
             </div>
@@ -34,47 +85,110 @@
             <div class="absolute top-[65%] left-[58%] w-64 sm:w-72 md:w-80">
                 <img class="w-full h-auto" src="./assets/signpost.png"/>
                 <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
-                    <p class="text-lg text-white font-thin">Today's growth</p>
-                    <p class="text-sm text-white">2h and 14mins till your next <span class="text-green-300">Sapling</span> </p>
+                    <p class="text-lg text-white font-thin font-mono">Today's growth</p>
+                    <p class="text-sm text-white font-mono">2h and 14mins till your next <span class="text-green-300">Sapling</span> </p>
                 </div>
             </div>
 
-            <div class="absolute top-[38%] left-[35%]">
-                <img class="w-[80%] h-auto" src="./assets/directionalSign.png"/>
-                <div class="absolute top-[29%] left-[42%]">
-                    <button onclick="theForest()" class="text-white px-5 py-2 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transtion-all">
+            <div class="absolute top-[28%] left-[35%]">
+                <img src="./assets/foliage3.png" class="w-[28%] h-[28%] absolute left-[38%] top-[86%] z-10" />
+                <img src="./assets/foliage3.png" class="w-[28%] h-[28%] absolute left-[33%] top-[83%] z-10" />
+                <div class="hover:scale-105 transition-all">
+                    <img class="w-[95%] h-auto" src="./assets/directionalSign.png"/>
+                    <div class="absolute top-[30%] left-[50%]">
+                    <button onclick="theForest()" class="font-mono text-white px-5 py-2 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 hover:bg-white/10 hover:text-emerald-300 transtion-all">
                         Your Forest
                     </button>
                 </div>
-            </div>
-
-            <div class="absolute top-[35%] left-[15%]">
-                <img class="w-80 h-150" src="./assets/signpost.png"/>
-                <p class="absolute top-[40px] left-[70px] z-10 text-lg text-white">Your Forest</p>
-                <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
-                    hi
                 </div>
+                
+                
+                
             </div>
 
-            <div class="absolute top-[35%] left-[75%]">
-                <img class="w-80 h-150" src="./assets/signpost.png"/>
-                <p class="absolute top-[24.5%] left-[25%] z-10 text-lg text-white">Connect Hackatime</p>
-                <div class="absolute top-[36%] bottom-[40%] left-[22%] right-[22%] flex flex-col items-center justify-center gap-1 text-center px-6 z-10">
-                    <div class="stat-card">
-                        <p class="text-white font-thin" id="total-hours-display">Loading</p>
-                    </div>
-                    <button onclick="connectHackatime()" class="bg-gradient-to-r from-teal-500 to-teal-800 text-white px-5 py-2 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transtion-all">
-                        Connect Hackatime
+            <div class="absolute top-[45%] left-[15%]">
+                <img class="w-[70%] h-[70%]" src="./assets/shop.png"/>
+                <button onclick="shopModal()" class="absolute top-[71%] left-[24%] bg-amber-400 text-white rounded-xl font-mono hover:scale-105 transition-all p-1">Click Here</button>
+            </div>
+            <div id="shopmodal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+                <div class="bg-mist-500 rounded-lg p-6 w-80 relative">
+                    <button onclick="closeShopModal()" class="absolute top-2 right-3 text-gray-500 hover:text-black">
+                        ❌
                     </button>
+                    <h2 class="text-lg font-bold mb-4 text-white font-mono">Shop</h2>
+                    <p class="text-sm text-gray-600">Shop content</p>
                 </div>
             </div>
+
+            
     </div>
-    
+
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+        <div class="bg-blue-500 rounded-lg p-6 w-80 relative">
+            <button onclick="closeSettingsModal()" class="absolute top-2 right-3 text-gray-500 hover:text-black">x</button>
+            <h2 class="text-lg font-bold mb-4 text-white font-mono">Settings</h2>
+            <button onclick="bgChange()">Enable Dark Mode</button>
+            <button onclick="bgChange2()">Enable Light Mode</button>
+            <p class="text-sm text-gray-600"></p>
+        </div>
+    </div>
+
     <script>
+        function spawnFireflies(count){
+            for(let i = 0; i<count; i++){
+                const fly = document.createElement("div");
+                fly.className = "firefly";
+                fly.style.left = `${Math.random() *100}%`;
+                fly.style.top = `${Math.random() *100}%`;
+                fly.style.setProperty("--dx1", `${Math.random() *60-30}px`);
+                fly.style.setProperty("--dy1", `${Math.random() *60-30}px`);
+                fly.style.setProperty("--dx2", `${Math.random() *60-30}px`);
+                fly.style.setProperty("--dy2", `${Math.random() *60-30}px`);
+                fly.style.setProperty("--dx3", `${Math.random() *60-30}px`);
+                fly.style.setProperty("--dy3", `${Math.random() *60-30}px`);
+                fly.style.animationDuration = `${2 + Math.random()*2}s, ${6+ Math.random() * 6}s`;
+                fly.style.animationDelay = `$(Math.random() * 2}s, ${Math.random() * 4}s`;
+                mainDiv.appendChild(fly);
+;            }
+        }
+        function clearFireFlies(){
+            document.querySelectorAll(".firefly").forEach(el => el.remove());
+        }
+        function bgChange(){
+            mainDiv.style.backgroundImage = "url('./assets/bgImg2.png')";
+            clearFireFlies();
+            spawnFireflies(20);
+        }
+        
+        function bgChange2(){
+            mainDiv.style.backgroundImage = "url('./assets/img1.png')";
+            clearFireFlies();
+        }
+        const mainDiv = document.querySelector(".mainDiv");
+
+
+        mainDiv.classList.add("arriving-dashboard");
+        mainDiv.addEventListener("animationend", () => {
+            mainDiv.classList.remove("arriving-dashboard");
+        }, {once: true});
+
+
+        function shopModal(){
+            document.getElementById("shopmodal").classList.remove("hidden");
+        }
+        function closeShopModal() {
+            document.getElementById("shopmodal").classList.add("hidden");
+        }
+        function openSettingsModal() {
+            document.getElementById("settingsModal").classList.remove("hidden");
+        }
+        function closeSettingsModal(){
+            document.getElementById("settingsModal").classList.add("hidden");
+        }
         const client_id = "UvqLX8h40jmFW2BZKYimI73Vzn5mFOYVoPwAj24nkHI";
         const params = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
-
+        
         const tokFromRedir = hashParams.get("token");
         if(tokFromRedir){
             localStorage.setItem("hackatimetok", tokFromRedir);
@@ -94,7 +208,10 @@
         );
 
         function theForest() {
-            window.location.href = "/forest.html";
+            document.querySelector(".mainDiv").classList.add("page-transition");
+            setTimeout(() => {
+                window.location.href = "forest.html";
+            }, 1200);
         }
 
         function connectHackatime(){
