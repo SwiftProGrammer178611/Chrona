@@ -124,4 +124,4 @@ if(require.main === module){
     })
 }
 
-module.export = app;
+module.exports = app;
