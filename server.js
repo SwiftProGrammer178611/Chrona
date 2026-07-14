@@ -28,6 +28,10 @@ app.get("/callback", async (req,res) =>{
         const clientID = process.env.HACKATIME_CLIENT_ID.trim();
         const clientSecret = process.env.HACKATIME_CLIENT_SECRET.trim();
         const redirectUri = process.env.HACKATIME_REDIRECT_URI.trim();
+        
+        console.log("clientid", JSON.stringify(clientID));
+        console.log("clientsec", JSON.stringify(clientSecret.slice(0,4) + "..." + clientSecret.slice(-4)), "legnth:", clientSecret.legnth);
+        console.log("redirURI", JSON.stringify(redirectUri), "length:", redirectUri.length);
 
         console.log("--- Sending these Exact values to Hackatime ---");
         console.log(`URI: "${redirectUri}`);
