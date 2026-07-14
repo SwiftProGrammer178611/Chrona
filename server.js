@@ -56,7 +56,7 @@ app.get("/callback", async (req,res) =>{
         const data = JSON.parse(rawResponse);
         console.log("succes!")
         userAccessTok=data.access_token;
-        res.redirect("/dashboard.html");
+        res.redirect(`/dashboard.html#token=${encodeURIComponent(data.access_token)}`);
     } catch (error) {
         console.error("Network Erro", error);
         res.status(500).send("error");
@@ -66,7 +66,11 @@ app.get("/callback", async (req,res) =>{
 //time to get data
 app.get("/api/stats", async (req,res) => {
     res.set("Cache-Control", "no-store");
-    if(!userAccessTok){return res.status(401).json({error: "no auth!"});}
+
+    const authHeader = req.headers.authorization;
+    const tok = authHeader?.startsWith("Bearer ") ? authHeader.slice(7):userAccessTok;
+
+    if(!tok){return res.status(401).json({error: "no auth!"});}
 
     try{
         const [hoursRes, projectsRes] = await Promise.all([
@@ -103,6 +107,7 @@ app.get("/api/stats", async (req,res) => {
 
         res.json({
             total_hours: `${hours}h ${minutes}m`,
+            total_seconds: totalSeconds,
             projects: projectsData.projects || []
         })
 

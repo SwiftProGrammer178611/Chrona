@@ -3,9 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Forest</title>
 </head>
 <body>
-    
+    <div class="mainDiv h-screen w-screen relative">
+        <img src="./assets/topSignPost.png"/>
+        <div class="treeSap" id="treeSap">
+            
+        </div>
+        
+    </div>
+    <script src="hackatime.js"></script>
+    <script>
+        let treeCounter = 0;
+
+        async function putTreeSapling(){
+            try{
+                const stats = await getHackatimeStats();
+
+                document.getElementById("treeSap").innerHTML=stats.total_hours;
+                const horsDec = stats.total_seconds / 3600;
+                if(horsDec > 1){
+                    document.getElementById("treeSap").innerHTML = '<img class="w-64 h-64" src="./assets/treeSapling.png"/>';
+                    console.log("wow");
+                    treeCounter++;
+                    localStorage.setItem("treeSaplingsinForest", treeCounter)
+                }
+            }catch(err){
+                    console.error(err);
+                }
+        }
+
+        putTreeSapling();
+    </script>
 </body>
 </html>
