@@ -11,19 +11,158 @@
 <body>
     <div id="forestBgImg" class="bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
         <img src="./assets/topSignPost.png"/>
-        <div class="treeSap" id="treeSap">
+        <div id="tierBoard" class="absolute top-4 left-4 pt-[18%] pl-[10%] text-white p-3 rounded z-30">
             
         </div>
         
     </div>
     <script src="hackatime.js"></script>
     <script>
-        let treeCounter = 0;
+        //Current implementations: Different plants, tier system, unlocking system, and growth cycling with tracked time, live it 'grows'. 
+        let tier = 0;
+        const plant_config = {
+            tree: { images: ["bgImg/treeStage1.png", "bgImg/treeStage2.png", "bgImg/treeStage3.png", "bgImg/treeStage4.png"]},
+            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ]},
+            pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"]},
+            cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"]},
+        };
+
+        const secondsPerStage = 90;
+        const maxSecondsPerStage = 100;
+
+        function rollStageThresholds(type) {
+            const numTransitions = plant_config[type].images.length -1;
+            let cumulative = 0;
+            const thresholds = [];
+            for(let i=0; i< numTransitions; i++){
+                cumulative += secondsPerStage + Math.random() * (maxSecondsPerStage - secondsPerStage);
+                thresholds.push(Math.round(cumulative));
+            }
+            return thresholds;
+        }
+
+        function getCurrentStage(plant, currentTotalSeconds){
+            const elapse = currentTotalSeconds - plant.plantedAtSeconds;
+            let stage = 0;
+            plant.stageThresholds.forEach((t,i) => {if(elapse >= t) stage = i+1; });
+            return stage;
+        }
+
+        function renderAllPlants(currentTotalSeconds) {
+            const ground = document.getElementById("forestBgImg");
+            document.querySelectorAll(".plantSprite").forEach(el => el.remove());
+            const plants = JSON.parse(localStorage.getItem("treeSIF") || "[]");
+            plants.forEach(p => {
+                const stage = getCurrentStage(p,currentTotalSeconds);
+                const img = document.createElement("img");
+                img.src = `assets/${plant_config[p.type].images[stage]}`;
+                img.className = "plantSprite absolute w-16 h-16 z-10";
+                img.style.left = `${p.x}%`;
+                img.style.top = `${p.y-4}%`;
+                ground.appendChild(img);
+            })
+        }
+
+        const tiers_forest = [
+            {
+                type: "tree",
+                label: "Trees",
+                unlockAt: 0
+            },
+            {
+                type: "shrub",
+                label: "Shrubs",
+                unlockAt: 10 // 10 trees
+            },
+            {
+                type: "pine",
+                label: "Pine Trees",
+                unlockAt: 10 // 10 shrubs
+            },
+            {
+                type: "cherry",
+                label: "Cherry Trees",
+                unlockAt: 5 //5 pines
+            }
+        ]
         
+        function getTierProgress() {
+            const plants = JSON.parse(localStorage.getItem("treeSIF")||"[]");
+            const counts = {tree:0,shrub:0,pine:0, cherry:0};
+            plants.forEach(p => {if (counts[p.type] !== undefined) counts[p.type]++; });
 
+            let unlockedTiers=[];
+            let nextTier = null;
 
-        async function genTreeHole(){
+            for(let i=0; i<tiers_forest.length; i++){
+                const tier = tiers_forest[i];
 
+                if(i===0){unlockedTiers.push(tier); continue;}
+
+                const prevTier = tiers_forest[i-1];
+                if(counts[prevTier.type] >= tier.unlockAt){
+                    unlockedTiers.push(tier);
+                }else{
+                    nextTier = {...tier,progress:counts[prevTier.type], needed: tier.unlockAt, from: prevTier.label};
+                    break;
+                }
+
+                
+            }
+            return { counts, unlockedTiers, nextTier };
+        }
+
+        function pickRandomPlantType() {
+            const { unlockedTiers } = getTierProgress();
+            const idx = Math.floor(Math.random() * unlockedTiers.length);
+            return unlockedTiers[idx].type;
+        }
+
+        function renderTierBoard() {
+            const {counts,unlockedTiers,nextTier}=getTierProgress();
+            const board = document.getElementById("tierBoard");
+            const unlockedTypes = unlockedTiers.map(t=>t.type);
+            let countsHTML = "";
+
+            if(unlockedTypes.includes("tree")){
+                countsHTML += `<div class="text-emerald-100">Trees: ${counts.tree}</div>`;
+            }
+            if(unlockedTypes.includes("shrub")){
+                countsHTML += `<div class="text-yellow-400">Shrubs: ${counts.shrub}</div>`;
+            }
+            if(unlockedTypes.includes("pine")){
+                countsHTML += `<div class="text-green-900">Pine Trees: ${counts.pine}</div>`;
+            }
+            if(unlockedTypes.includes("cherry")){
+                countsHTML += `<div class=" text-rose-400">Cherry Trees: ${counts.cherry}`;
+            }
+
+            let progressHTML;
+
+            if(nextTier){
+                const pct = Math.min(100,(nextTier.progress/nextTier.needed)*100);
+                progressHTML = `
+                <div class="mt-2 text-sm">${nextTier.progress}/${nextTier.needed} ${nextTier.from} to unlock ${nextTier.label}</div>
+                <div class=" w-full bg-emerald/30 rounded-full h-3 mt-1"><div class="bg-orange-400 h-3 rounded-full" style="width:${pct}%"></div></div>`;
+            }else{
+                progressHTML=`<div class="mt-2 text-sm text-green-300"> ALL TIERS UNLOCKED :)</div>`;
+            }
+            board.innerHTML = `<div class="text-xl">${countsHTML}</div>${progressHTML}`;
+        }
+
+        function genTreeHole(){
+            const gnd = document.getElementById("forestBgImg");
+
+            const x = 10 + Math.random() * 80;
+            const y = 60 + Math.random() * 30;
+
+            const hole = document.createElement("img");
+            hole.src = "/assets/bgImg/plantHole.png";
+            hole.className = "absolute w-16 h-16 z-20";
+            hole.style.left = `${x}%`;
+            hole.style.top = `${y}%`;
+            gnd.appendChild(hole);
+            return{hole,x,y};
         }
 
         async function shrubs() {
@@ -36,13 +175,13 @@
                 const horsDec = stats.total_seconds / 3600;
                 const forestBgImg = document.getElementById("forestBgImg");
 
-                if(horsDec>6){
+                if(horsDec>70){
                     forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl4.png')";
                 }
-                else if(horsDec>4){
+                else if(horsDec>50){
                     forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl3.png')";
                 }
-                else if(horsDec>2){
+                else if(horsDec>30){
                     forestBgImg.style.backgroundImage = "url('/assets/bgImg/Forestlvl2.png')";
                 }
                 else {
@@ -52,24 +191,69 @@
                     console.error(err);
                 }
         }
+
+        function renderExistingTrees(){
+            const ground = document.getElementById("forestBgImg");
+            const trees = JSON.parse(localStorage.getItem("treeSIF") || "[]");
+            
+            trees.forEach(({x,y}) => {
+                const tree = document.createElement("img");
+                tree.src = "./assets/treeSapling.png";
+                tree.className = "absolute w-16 h-16 z-10";
+                tree.style.left = `${x}%`;
+                tree.style.top = `${y-4}%`;
+
+                ground.appendChild(tree);
+            });
+            return trees;
+        }   
+
+        function plantTreeAt(x,y){
+            const ground = document.getElementById("forestBgImg");
+            const tree = document.createElement("img");
+            tree.src = "./assets/treeSapling.png";
+            tree.className = "absolute w-16 h-16 z-10";
+            tree.style.left = `${x}%`;
+            tree.style.top = `${y-4}%`;
+            ground.appendChild(tree);
+        }
         async function putTreeSapling(){
             try{
                 const stats = await getHackatimeStats();
-
-                document.getElementById("treeSap").innerHTML=stats.total_hours;
                 const horsDec = stats.total_seconds / 3600;
-                if(horsDec > 1){
-                    document.getElementById("treeSap").innerHTML = '<img class="w-64 h-64" src="./assets/treeSapling.png"/>';
-                    console.log("wow");
-                    treeCounter++;
-                    localStorage.setItem("treeSaplingsinForest", treeCounter)
+
+                const targetTreeCount = Math.floor(horsDec);
+                const exisitngTrees = JSON.parse(localStorage.getItem("treeSIF")||"[]");
+                const plantedCount = exisitngTrees.length;
+
+                if(targetTreeCount > plantedCount) {
+                    for(let i = 0; i<targetTreeCount-plantedCount; i++) {
+                        const { hole,x,y } = genTreeHole();
+                        const type = pickRandomPlantType();
+                        setTimeout(()=> {
+                            
+                            hole.remove();
+                            renderAllPlants(stats.total_seconds);
+                        }, 700);
+                        exisitngTrees.push({
+                            x,y,type,
+                            plantedAtSeconds:stats.total_seconds,
+                            stageThresholds: rollStageThresholds(type)
+                        });
+                        localStorage.setItem("treeSIF", JSON.stringify(exisitngTrees));
+                    }
+                }else{
+                    renderAllPlants(stats.total_seconds);
                 }
+                renderTierBoard();
             }catch(err){
                     console.error(err);
                 }
         }
         putTreeSapling();
         backgroundImgChanges();
+        setInterval(putTreeSapling, 60000);
+        setInterval(backgroundImgChanges, 60000);
     </script>
 </body>
 </html>

@@ -8,6 +8,11 @@
     <title>Dashbaord</title>
 </head>
 <body>
+    <style>
+        .page-transition{
+            animation: walkForward 1.2s ease-in forwards;
+        }
+    </style>
     
     <!--Big breakthrough here. Couldn't figure out how to center the text on teh sign post for a while! After some reserach, The main issue was felx, oncce removed it wokred, but i needed flex. 
     by default, tailwind flex prop appplies a stretch properpty to the items, and it stretched the sign to the height of the screen(the wrapper, not the img itself). 
