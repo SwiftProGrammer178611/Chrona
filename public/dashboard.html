@@ -246,7 +246,7 @@
             try {
                 const res = await fetch("/api/stats", {
                     cache:"no-store",
-                    hedaers: storedToken ? {"Authorization":`Bearer ${storedToken}}`}:{}
+                    headers: storedToken ? {"Authorization":`Bearer ${storedToken}`}:{}
                 });
 
                 if (!res.ok){
