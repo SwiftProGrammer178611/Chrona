@@ -41,7 +41,7 @@
         let tier = 0;
         const plant_config = {
             tree: { images: ["bgImg/treeStage1.png", "bgImg/treeStage2.png", "bgImg/treeStage3.png", "bgImg/treeStage4.png"], sizes: ["w-8 h-8", "w-10 h-10", "w-14 h-14", "w-20 h-20"]},
-            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ], sizes: ["w-10 h-110", "w-16 h-16"]},
+            shrub: { images: ["bgImg/shrubStage1.png", "bgImg/shrubStage2.png" ], sizes: ["w-10 h-10", "w-16 h-16"]},
             pine: { images: ["bgImg/pineStage1.png", "bgImg/pineStage2.png", "bgImg/pineStage3.png"], sizes: ["w-8 h-8", "w-12 h-12", "w-20 h-20"]},
             cherry: { images: ["bgImg/cherryStage1.png", "bgImg/cherryStage2.png", "bgImg/cherryStage3.png"], sizes: ["w-10 h-10", "w-14 h-14", "w-20 h-20"]},
         };
@@ -77,7 +77,6 @@
                 const src = `assets/${plant_config[p.type].images[stage]}`;
 
                 let img = document.querySelector(`.plantSprite[data-index="${i}"]`);
-
                 if(!img){
                     img = document.createElement("img");
                     img.className = "plantSprite absolute z-10";
