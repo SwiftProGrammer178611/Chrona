@@ -79,10 +79,10 @@ app.get("/api/stats", async (req,res) => {
     try{
         const [hoursRes, projectsRes] = await Promise.all([
             fetch("https://hackatime.hackclub.com/api/v1/authenticated/hours",{
-                headers: {"Authorization": `Bearer ${userAccessTok}`}
+                headers: {"Authorization": `Bearer ${tok}`}
             }),
             fetch("https://hackatime.hackclub.com/api/v1/authenticated/projects",{
-                headers:{"Authorization": `Bearer ${userAccessTok}`}
+                headers:{"Authorization": `Bearer ${tok}`}
             })
         ]);
 
