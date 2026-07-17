@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="styles.css"/>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Forest</title>
-    
+
 </head>
 <body>
     <style>
@@ -17,6 +17,9 @@
         }
         .plantSprite {
             transition: opacity 0.6s ease, width 0.6s ease, height 0.6s ease;
+            
+            max-width: 12vw;
+            max-height: 12vw;
         }
 
         #forestBgImg.leaving-forest{
@@ -29,24 +32,51 @@
     </style>
 
     <div id="forestBgImg" class="forestBgImg bg-[url('/assets/bgImg/Forestlvl1.png')] bg-cover bg-no-repeat bg-center h-screen w-screen relative">
-        
+
         <div id="tierBoard" class="absolute top-4 left-4 bg-black/60 backdrop-blur-sm border border-emerald-700/40 text-white p-4 rounded-xl shadow-lg w-72">
         </div>
     </div>
-    <script src="hackatime.js"></script> 
+    <script src="hackatime.js"></script>
 
     <script>
         document.getElementById("forestBgImg").classList.add("page-transition");
-        //Current implementations: Different plants, tier system, unlocking system, and growth cycling with tracked time, live it 'grows'. 
+        
         let tier = 0;
         const plant_config = {
-            tree: { images: ["/Tree4ImgAsset/specTree1.png", "/Tree4ImgAsset/specTree2.png", "/Tree4ImgAsset/specTree3.png"], sizes: ["w-14 h-14", "w-20 h-20", "w-30 h-30"]},
-            shrub: { images: ["/bushesType1/bt1.png", "/bushesType1/bt2.png", "/bushesType1/bt3.png" ], sizes: ["w-20 h-20", "w-30 h-30", "w-40 h-40"]},
+         
+            tree: { images: ["/Tree4ImgAsset/specTree1.png", "/Tree4ImgAsset/specTree2.png", "/Tree4ImgAsset/specTree3.png"], sizes: ["w-14 h-14", "w-20 h-20", "w-28 h-28"]},
+            shrub: { images: ["/bushesType1/bt1.png", "/bushesType1/bt2.png", "/bushesType1/bt3.png" ], sizes: ["w-20 h-20", "w-28 h-28", "w-40 h-40"]},
             pine: { images: ["/Tree1ImgAsset/Treeimg1.png", "/Tree1ImgAsset/Treeimg2.png", "/Tree1ImgAsset/Treeimg3.png", "/Tree1ImgAsset/Treeimg4.png", "/Tree1ImgAsset/Treeimg5.png"], sizes: ["w-8 h-8", "w-12 h-12", "w-20 h-20", "w-20 h-20", "w-20 h-20"]},
             cherry: { images: ["/Tree1ImgAsset/Treeimg1.png", "/Tree1ImgAsset/Treeimg2.png", "/Tree1ImgAsset/Treeimg3.png", "/Tree1ImgAsset/Treeimg4.png", "/Tree1ImgAsset/Treeimg5.png"], sizes: ["w-8 h-8", "w-12 h-12", "w-20 h-20", "w-20 h-20", "w-20 h-20"]},
         }
         const secondsPerStage = 300;
         const maxSecondsPerStage = 400;
+
+        
+        const GROUND_BOUNDS = { xMin: 5, xMax: 95, yMin: 88, yMax: 92 };
+
+        function randomGroundX() {
+            return GROUND_BOUNDS.xMin + Math.random() * (GROUND_BOUNDS.xMax - GROUND_BOUNDS.xMin);
+        }
+        function randomGroundY() {
+            return GROUND_BOUNDS.yMin + Math.random() * (GROUND_BOUNDS.yMax - GROUND_BOUNDS.yMin);
+        }
+        
+        const GROUND_VERSION = 1;
+
+        function migrateOutOfBoundsPlants() {
+            const storedVersion = Number(localStorage.getItem("treeSIF_groundVersion") || 0);
+            if (storedVersion === GROUND_VERSION) return;
+
+            const plants = JSON.parse(localStorage.getItem("treeSIF") || "[]");
+            plants.forEach((p) => {
+                p.x = randomGroundX();
+                p.y = randomGroundY();
+            });
+
+            localStorage.setItem("treeSIF", JSON.stringify(plants));
+            localStorage.setItem("treeSIF_groundVersion", String(GROUND_VERSION));
+        }
 
         function rollStageThresholds(type) {
             const numTransitions = plant_config[type].images.length -1;
@@ -69,7 +99,7 @@
         function renderAllPlants(currentTotalSeconds) {
             const ground = document.getElementById("forestBgImg");
             const plants = JSON.parse(localStorage.getItem("treeSIF") || "[]");
-            
+
             plants.forEach((p,i) => {
                 const stage = getCurrentStage(p,currentTotalSeconds);
                 const size = plant_config[p.type].sizes[stage];
@@ -79,10 +109,10 @@
                 if(!img){
                     img = document.createElement("img");
                     img.className = "plantSprite absolute z-10";
-                    img.dataset.index = i; 
+                    img.dataset.index = i;
                     img.dataset.stage=stage
                     img.style.left = `${p.x}%`;
-                    img.style.top = `${p.y-4}%`;
+                    img.style.top = `${p.y}%`;
                     img.style.opacity = "0";
                     img.src = src;
                     ground.appendChild(img);
@@ -94,12 +124,12 @@
                 }else if (Number(img.dataset.stage) !== stage){
                     img.style.opacity = "0";
                     setTimeout(() => {
-                        
+
                         img.src = src;
                         img.className = `plantSprite absolute ${size} z-10`;
                         img.dataset.stage = stage;
                         img.style.left = `${p.x}%`;
-                        img.style.top = `${p.y-4}%`;
+                        img.style.top = `${p.y}%`;
                         img.style.opacity = "1";
                     }, 600)
                 }
@@ -150,7 +180,7 @@
                     break;
                 }
 
-                
+
             }
             return { counts, unlockedTiers, nextTier };
         }
@@ -166,7 +196,7 @@
             setTimeout(()=>{
                 window.location.href = "dashboard.html";
             },1200)
-            
+
         }
 
         function renderTierBoard() {
@@ -201,23 +231,27 @@
             board.innerHTML = `<div class="text-xl font-mono mb-1 space-y-2">${countsHTML}</div>${progressHTML}<button onclick="goHome()" class="mt-3 font-mono text-white bg-emerald-700 hover:bg-emerald-600 px-4 py-1.5 rounded-full text-sm transition-all w-full">Go back</button>`;
         }
 
-        
 
-        function genTreeHole(){
+
+        function genTreeHole() {
             const gnd = document.getElementById("forestBgImg");
 
-            const x = 10 + Math.random() * 78;
-            const y = 60 + Math.random() * 28;
+            
+            const x = randomGroundX();
+
+            
+            const y = randomGroundY();
 
             const hole = document.createElement("img");
             hole.src = "/assets/bgImg/plantHole.png";
             hole.className = "absolute w-16 h-16 z-20";
             hole.style.left = `${x}%`;
             hole.style.top = `${y}%`;
-            gnd.appendChild(hole);
-            return{hole,x,y};
-        }
 
+            gnd.appendChild(hole);
+
+            return { hole, x, y };
+        }
         async function shrubs() {
 
         }
@@ -248,7 +282,7 @@
         function renderExistingTrees(){
             const ground = document.getElementById("forestBgImg");
             const trees = JSON.parse(localStorage.getItem("treeSIF") || "[]");
-            
+
             trees.forEach(({x,y}) => {
                 const tree = document.createElement("img");
                 tree.src = "./assets/treeSapling.png";
@@ -259,7 +293,7 @@
                 ground.appendChild(tree);
             });
             return trees;
-        }   
+        }
 
         function plantTreeAt(x,y){
             const ground = document.getElementById("forestBgImg");
@@ -284,7 +318,7 @@
                         const { hole,x,y } = genTreeHole();
                         const type = pickRandomPlantType();
                         setTimeout(()=> {
-                            
+
                             hole.remove();
                             renderAllPlants(stats.total_seconds);
                         }, 700);
@@ -303,6 +337,8 @@
                     console.error(err);
                 }
         }
+
+        migrateOutOfBoundsPlants();
         putTreeSapling();
         backgroundImgChanges();
         setInterval(putTreeSapling, 60000);
